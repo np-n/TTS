@@ -7,6 +7,8 @@ from typing import List
 
 import pandas as pd
 from tqdm import tqdm
+import csv
+
 
 ########################
 # DATASETS
@@ -253,7 +255,7 @@ def nancy(root_path, meta_file, **kwargs):  # pylint: disable=unused-argument
     with open(txt_file, "r", encoding="utf-8") as ttf:
         for line in ttf:
             utt_id = line.split()[1]
-            text = line[line.find('"') + 1 : line.rfind('"') - 1]
+            text = line[line.find('"') + 1: line.rfind('"') - 1]
             wav_file = os.path.join(root_path, "wavn", utt_id + ".wav")
             items.append({"text": text, "audio_file": wav_file, "speaker_name": speaker_name})
     return items
@@ -379,7 +381,7 @@ def vctk(root_path, meta_files=None, wavs_path="wav48_silence_trimmed", mic="mic
     """
     file_ext = "flac"
     items = []
-    meta_files = glob(f"{os.path.join(root_path,'txt')}/**/*.txt", recursive=True)
+    meta_files = glob(f"{os.path.join(root_path, 'txt')}/**/*.txt", recursive=True)
     for meta_file in meta_files:
         _, speaker_id, txt_file = os.path.relpath(meta_file, root_path).split(os.sep)
         file_id = txt_file.split(".")[0]
@@ -406,7 +408,7 @@ def vctk(root_path, meta_files=None, wavs_path="wav48_silence_trimmed", mic="mic
 def vctk_old(root_path, meta_files=None, wavs_path="wav48", ignored_speakers=None):
     """homepages.inf.ed.ac.uk/jyamagis/release/VCTK-Corpus.tar.gz"""
     items = []
-    meta_files = glob(f"{os.path.join(root_path,'txt')}/**/*.txt", recursive=True)
+    meta_files = glob(f"{os.path.join(root_path, 'txt')}/**/*.txt", recursive=True)
     for meta_file in meta_files:
         _, speaker_id, txt_file = os.path.relpath(meta_file, root_path).split(os.sep)
         file_id = txt_file.split(".")[0]
@@ -515,9 +517,9 @@ def _voxcel_x(root_path, meta_file, voxcel_idx):
         meta_data = []
         wav_files = voxceleb_path.rglob("**/*.wav")
         for path in tqdm(
-            wav_files,
-            desc=f"Building VoxCeleb {voxcel_idx} Meta file ... this needs to be done only once.",
-            total=expected_count,
+                wav_files,
+                desc=f"Building VoxCeleb {voxcel_idx} Meta file ... this needs to be done only once.",
+                total=expected_count,
         ):
             speaker_id = str(Path(path).parent.parent.stem)
             assert speaker_id.startswith("id")
@@ -599,5 +601,21 @@ def kss(root_path, meta_file, **kwargs):  # pylint: disable=unused-argument
             cols = line.split("|")
             wav_file = os.path.join(root_path, cols[0])
             text = cols[2]  # cols[1] => 6월, cols[2] => 유월
+            items.append({"text": text, "audio_file": wav_file, "speaker_name": speaker_name, "root_path": root_path})
+    return items
+
+
+def nepal_itts(root_path, meta_file, **kwargs):  # pylint: disable=unused-argument
+    """Normalizes the Nepali tts  metadata file to TTS format
+    https://www.openslr.org/43/"""
+    text_file = os.path.join(root_path, meta_file)
+    items = []
+    speaker_name = "nepali_tts"
+
+    with open(text_file) as f:
+        data = csv.reader(f, delimiter="\t")
+        for line in data:
+            wav_file = os.path.join(root_path, "wavs", line[0], ".wav")
+            text = line[1]
             items.append({"text": text, "audio_file": wav_file, "speaker_name": speaker_name, "root_path": root_path})
     return items
