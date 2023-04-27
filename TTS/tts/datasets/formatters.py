@@ -605,7 +605,7 @@ def kss(root_path, meta_file, **kwargs):  # pylint: disable=unused-argument
     return items
 
 
-def nepal_itts(root_path, meta_file, **kwargs):  # pylint: disable=unused-argument
+def nepali_tts(root_path, meta_file, **kwargs):  # pylint: disable=unused-argument
     """Normalizes the Nepali tts  metadata file to TTS format
     https://www.openslr.org/43/"""
     text_file = os.path.join(root_path, meta_file)
